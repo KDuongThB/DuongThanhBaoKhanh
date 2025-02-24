@@ -6,7 +6,7 @@ Given the following file, write a CLI command to complete the objective:
 Objective: submit a HTTP GET request to ```https://example.com/api/:order_id``` with Order IDs that are selling ```TSLA```, writing to output to ```./output.txt```
 
 File: ```./transaction-log.txt```
-```
+```json
 {"order_id": "12345", "symbol": "AAPL", "quantity": 100, "price": 142.50, "side": "buy", "timestamp": "2025-02-18T09:15:30Z"}
 {"order_id": "12346", "symbol": "TSLA", "quantity": 50, "price": 890.15, "side": "sell", "timestamp": "2025-02-18T09:16:10Z"}
 {"order_id": "12347", "symbol": "GOOG", "quantity": 10, "price": 2850.60, "side": "buy", "timestamp": "2025-02-18T09:17:20Z"}
@@ -37,7 +37,7 @@ grep '"symbol": "TSLA", "quantity": [0-9]*, "price": [0-9.]*, "side": "sell"' ./
 - pipe (```|```) to ```awk -F'"' '{for(i=1;i<=NF;i++) if($i=="order_id") print $(i+2)}'``` to extract value of key 'order-id' from the result of ```grep```
 - pipe to ```xargs -I {} curl -s "https://example.com/api/{}" >> ./output.txt``` to call a HTTP request to https://example.com/api/order_id to with each value of ```order_id``` extracted (```xargs -I {}``` replace ```{}``` in the API endpoint with each ```order_id```) and write output to ```output.txt``` 
 - if you replace ```curl -s``` with ```echo```, the command would be :
-  ```
+  ```bash
   grep '"symbol": "TSLA", "quantity": [0-9]*, "price": [0-9.]*, "side": "sell"' ./transaction-log.txt | awk -F'"' '{for(i=1;i<=NF;i++) if($i=="order_id") print $(i+2)}' | xargs -I {} echo "https://example.com/api/:{}" >> ./endpoints.txt
   ```
   and each line of the content of ```endpoints.txt``` will be an API endpoint respective to each ```order_id``` that would be called if you used ```curl -s```
