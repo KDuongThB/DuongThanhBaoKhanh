@@ -1,11 +1,14 @@
 # Problem 1
+
 ## Task
+
 Task
 Given the following file, write a CLI command to complete the objective:
 
 Objective: submit a HTTP GET request to ```https://example.com/api/:order_id``` with Order IDs that are selling ```TSLA```, writing to output to ```./output.txt```
 
 File: ```./transaction-log.txt```
+
 ```json
 {"order_id": "12345", "symbol": "AAPL", "quantity": 100, "price": 142.50, "side": "buy", "timestamp": "2025-02-18T09:15:30Z"}
 {"order_id": "12346", "symbol": "TSLA", "quantity": 50, "price": 890.15, "side": "sell", "timestamp": "2025-02-18T09:16:10Z"}
@@ -28,16 +31,38 @@ File: ```./transaction-log.txt```
 {"order_id": "12363", "symbol": "NVDA", "quantity": 120, "price": 220.80, "side": "buy", "timestamp": "2025-02-18T09:29:30Z"}
 {"order_id": "12364", "symbol": "NFLX", "quantity": 40, "price": 648.50, "side": "sell", "timestamp": "2025-02-18T09:30:00Z"}
 ```
-## Answer:
-```bash
-grep '"symbol": "TSLA", "quantity": [0-9]*, "price": [0-9.]*, "side": "sell"' ./transaction-log.txt | jq -r '.order_id' | xargs -I {} curl -s "https://example.com/api/:{}" >> ./output.txt
-```
-## Explanation for my answer:
-- use ```grep '"symbol": "TSLA", "quantity": [0-9]*, "price": [0-9.]*, "side": "sell"' ./transaction-log.txt``` to filter lines that contain orders that are selling ```TSLA```
-- pipe (```|```) to ```awk -F'"' '{for(i=1;i<=NF;i++) if($i=="order_id") print $(i+2)}'``` to extract value of key 'order-id' from the result of ```grep```
-- pipe to ```xargs -I {} curl -s "https://example.com/api/{}" >> ./output.txt``` to call a HTTP request to https://example.com/api/order_id to with each value of ```order_id``` extracted (```xargs -I {}``` replace ```{}``` in the API endpoint with each ```order_id```) and write output to ```output.txt``` 
-- if you replace ```curl -s``` with ```echo```, the command would be :
+
+## Answer
+
+- if we have ```jq``` and ```curl``` installed:
+
   ```bash
-  grep '"symbol": "TSLA", "quantity": [0-9]*, "price": [0-9.]*, "side": "sell"' ./transaction-log.txt | awk -F'"' '{for(i=1;i<=NF;i++) if($i=="order_id") print $(i+2)}' | xargs -I {} echo "https://example.com/api/:{}" >> ./endpoints.txt
+  grep '"symbol": "TSLA", "quantity": [0-9]*, "price": [0-9.]*, "side": "sell"' ./transaction-log.txt | jq -r '.order_id' | xargs -I {} curl -s "https://example.com/api/{}" >> ./output.txt
   ```
-  and each line of the content of ```endpoints.txt``` will be an API endpoint respective to each ```order_id``` that would be called if you used ```curl -s```
+
+## Explanation for my answer
+
+- use ```grep '"symbol": "TSLA", "quantity": [0-9]*, "price": [0-9.]*, "side": "sell"' ./transaction-log.txt``` to filter lines that contain orders that are selling ```TSLA```
+- pipe to ```jq .order_id``` to extract values of key 'order-id' from the result of ```grep```
+- pipe to ```xargs -I {} curl -s "https://example.com/api/{}" >> ./output.txt``` to call a HTTP request to <https://example.com/api/:order_id> to with each value of ```order_id``` extracted (```xargs -I {}``` replace ```{}``` in the API endpoint with each ```order_id```) and write output to ```output.txt```
+- if you replace ```curl -s``` with ```echo```, the command would be:
+
+  ```bash
+  grep '"symbol": "TSLA", "quantity": [0-9]*, "price": [0-9.]*, "side": "sell"' ./transaction-log.txt | jq .order_id | xargs -I {} echo "https://example.com/api/{}" >> ./urls.txt
+  ```
+
+  and each line of the content of ```urls.txt``` will be an API endpoint respective to each ```order_id``` that would be called if you used ```curl -s```
+
+- Since ```https://example.com``` doesn't have that endpoint, it will return an error code 404 (Not found).
+
+## Alternatives
+
+- since ```jq``` and ```curl``` are not preinstalled on Ubuntu 24.04
+
+  - we can replace ```jq .order_id``` with ```awk -F'"' '{for(i=1;i<=NF;i++) if($i=="order_id") print $(i+2)}'```
+  - replace ```curl -s``` with ```sh -c 'echo -e "GET /api/{} HTTP/1.1\r\nHost: example.com\r\nConnection: close\r\n\r\n" | nc example.com 80' >> ./output.txt``` to call the same API
+  - which results in the following command:
+
+    ```bash
+    grep '"symbol": "TSLA", "quantity": [0-9]*, "price": [0-9.]*, "side": "sell"' ./transaction-log.txt | awk -F'"' '{for(i=1;i<=NF;i++) if($i=="order_id") print $(i+2)}' | xargs -I {} sh -c 'printf "GET /api/{} HTTP/1.1\r\nHost: example.com\r\nConnection: close\r\n\r\n" | nc example.com 80' >> ./output.txt
+    ```
