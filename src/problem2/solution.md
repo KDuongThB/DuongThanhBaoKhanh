@@ -32,7 +32,7 @@ You are limited to the following constraints for your plan.
 #### 1. Compute
 
 - **Amazon ECS Fargate with Blue-Green Deployment and Auto Scaling:** Containerized services with zero-downtime deployments and Auto Scaling ensures sufficient capacity for handling traffic spikes. Blue/Green Deployment also helps with version control.
-- HAProxy running on a low-cost EC2 instance in the same VPC as the ECS services.
+- **HAProxy** running on a low-cost EC2 instance in the same VPC as the ECS services.
 - **AWS Lambda:** Executes background jobs asynchronously for lightweight, cost-effective processing.
 Considerable alternatives to **ECS** could be **EKS (higher cost and complexity but has very good scalability and flexibility)** or **EC2 (higher maintenance overhead)**
 
@@ -49,8 +49,9 @@ Considerable alternatives to **ECS** could be **EKS (higher cost and complexity 
 #### 4. Networking & Security
 
 - **AWS Application Load Balancer (ALB)** distributes incoming traffic across multiple ECS tasks, ensuring availability. Also, it is needed for Blue/Green deployment.
-
-- **CloudFront with AWS WAFv2** ensures low-latency content delivery
+- **CloudFront with AWS WAFv2** ensures low-latency content delivery and caching
+- **Route53 and Amazon Certificate Manager (ACM)** for Hosting and SSL/TSL certificate requests
+- **API Gateway** to handle APIs
 - **Amazon Cognito:** Securely manages user authentication and authorization.
 - **Secret Manager, Parameter Store and Key Management Service** for encryption and secure storage of secrets.
 
@@ -70,3 +71,9 @@ Considerable alternatives to **ECS** could be **EKS (higher cost and complexity 
 
 - **AWS CloudFormation** or **AWS CDK** to manage resources
 - **Terraform** for Infrastructure-as-Code is a great alternative but i'm not sure if it's considered part of AWS Provider (following the Task's constraints)
+
+### Scaling Strategies for when Product grows
+- ECS Autoscaling Group to scale horizontally
+- Buy reserved instances for better cost optimization
+- spread containers across availability zones
+- automatic scaling for Elasticache and RDS
