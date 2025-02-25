@@ -60,8 +60,7 @@ File: ```./transaction-log.txt```
 - since ```jq``` and ```curl``` are not preinstalled on Ubuntu 24.04
 
   - we can replace ```jq .order_id``` with ```awk -F'"' '{for(i=1;i<=NF;i++) if($i=="order_id") print $(i+2)}'```
-  - replace ```curl -s``` with ```sh -c 'echo -e "GET /api/{} HTTP/1.1\r\nHost: example.com\r\nConnection: close\r\n\r\n" | nc example.com 80' >> ./output.txt``` to call the same API
-  - which results in the following command:
+  - replace ```curl -s``` with ```sh -c 'printf "GET /api/{} HTTP/1.1\r\nHost: example.com\r\nConnection: close\r\n\r\n" | nc example.com 80' >> ./output.txt``` to call the same API with ```netcat```, which results in the following command:
 
     ```bash
     grep '"symbol": "TSLA", "quantity": [0-9]*, "price": [0-9.]*, "side": "sell"' ./transaction-log.txt | awk -F'"' '{for(i=1;i<=NF;i++) if($i=="order_id") print $(i+2)}' | xargs -I {} sh -c 'printf "GET /api/{} HTTP/1.1\r\nHost: example.com\r\nConnection: close\r\n\r\n" | nc example.com 80' >> ./output.txt
