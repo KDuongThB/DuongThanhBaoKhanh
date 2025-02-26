@@ -32,6 +32,8 @@ File: ```./transaction-log.txt```
 {"order_id": "12364", "symbol": "NFLX", "quantity": 40, "price": 648.50, "side": "sell", "timestamp": "2025-02-18T09:30:00Z"}
 ```
 
+---
+
 ## Answer
 
 - if we have ```jq``` and ```curl``` installed:

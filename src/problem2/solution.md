@@ -22,6 +22,8 @@ You are limited to the following constraints for your plan.
 | Throughput        |   500 requests per second    |
 | Response Time     |  p99 response time of <100ms |
 
+---
+
 ## Answer
 
 ### System overview
